@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhanghui.yx.dao.YxVideoDao">
+    <resultMap type="com.zhanghui.yx.entity.YxVideo" id="YxVideoMap">
+        <result property="id" column="v_id" jdbcType="VARCHAR"/>
+        <result property="title" column="v_title" jdbcType="VARCHAR"/>
+        <result property="brief" column="v_brief" jdbcType="VARCHAR"/>
+        <result property="videoDate" column="v_video_date" jdbcType="TIMESTAMP"/>
+        <result property="categoryId" column="v_category_id" jdbcType="VARCHAR"/>
+        <result property="groupId" column="v_group_id" jdbcType="VARCHAR"/>
+        <result property="userId" column="v_user_id" jdbcType="VARCHAR"/>
+        <result property="videoPath" column="v_video_path" jdbcType="VARCHAR"/>
+        <result property="coverPath" column="v_cover_path" jdbcType="VARCHAR"/>
+        <association property="yxCategory" javaType="com.zhanghui.yx.entity.YxCategory">
+            <id property="id" column="y_id"/>
+            <result property="categoryName" column="y_category_name"/>
+        </association>
+        <association property="yxUser" javaType="com.zhanghui.yx.entity.YxUser">
+            <id property="id" column="u_id"/>
+            <result property="userName" column="u_user_name"/>
+        </association>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="YxVideoMap">
+        select v.id as v_id,
+        v.title as v_title,
+        v.brief as v_brief,
+        v.video_date as v_video_date,
+        v.category_id as v_category_id,
+        v.group_id as v_group_id,
+        v.user_id as v_user_id,
+        v.video_path as v_video_path,
+        v.cover_path as v_cover_path
+        from yingx.yx_video v
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="YxVideoMap">
+        select v.id as v_id,
+        v.title as v_title,
+        v.brief as v_brief,
+        v.video_date as v_video_date,
+        v.category_id as v_category_id,
+        v.group_id as v_group_id,
+        v.user_id as v_user_id,
+        v.video_path as v_video_path,
+        v.cover_path as v_cover_path,
+        y.id as y_id,
+        y.category_name as y_category_name,
+        u.id as u_id,
+        u.user_name as u_user_name
+        from yingx.yx_video v
+        left join yingx.yx_category y
+        on v.category_id = y.id
+        left join yingx.yx_user u
+        on v.user_id = u.id
+
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="YxVideoMap">
+        select id,
+        title,
+        brief,
+        video_date,
+        category_id,
+        group_id,
+        user_id,
+        video_path,
+        cover_path
+        from yingx.yx_video
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="brief != null and brief != ''">
+                and brief = #{brief}
+            </if>
+            <if test="videoDate != null">
+                and video_date = #{videoDate}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                and category_id = #{categoryId}
+            </if>
+            <if test="groupId != null and groupId != ''">
+                and group_id = #{groupId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="videoPath != null and videoPath != ''">
+                and video_path = #{videoPath}
+            </if>
+            <if test="coverPath != null and coverPath != ''">
+                and cover_path = #{coverPath}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into yingx.yx_video(id, title, brief, video_date, category_id, group_id, user_id, video_path, cover_path)
+        values (#{id}, #{title}, #{brief}, #{videoDate}, #{categoryId}, #{groupId}, #{userId}, #{videoPath},
+        #{coverPath})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update yingx.yx_video
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="brief != null and brief != ''">
+                brief = #{brief},
+            </if>
+            <if test="videoDate != null">
+                video_date = #{videoDate},
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                category_id = #{categoryId},
+            </if>
+            <if test="groupId != null and groupId != ''">
+                group_id = #{groupId},
+            </if>
+            <if test="userId != null and userId != ''">
+                user_id = #{userId},
+            </if>
+            <if test="videoPath != null and videoPath != ''">
+                video_path = #{videoPath},
+            </if>
+            <if test="coverPath != null and coverPath != ''">
+                cover_path = #{coverPath},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from yingx.yx_video
+        where id = #{id}
+    </delete>
+
+    <!--查询所有条数-->
+    <select id="selectAllCount" resultType="int">
+        select count(id)
+        from yingx.yx_video
+    </select>
+
+
+    <select id="queryByReleaseTime" resultMap="queryByRelease">
+        select
+        <include refid="videoAndUser"/>
+        order by v.video_date desc
+    </select>
+    <sql id="videoAndUser">
+            v.id            as v_id,
+            v.title         as v_title,
+            v.brief         as v_brief,
+            v.video_date    as v_video_date,
+            v.video_path    as v_video_path,
+            v.cover_path    as v_cover_path,
+            y.id            as y_id,
+            y.category_name as y_category_name,
+            u.id            as u_id,
+            u.user_name     as u_user_name,
+            u.head_img      as u_head_img
+        from yingx.yx_category y
+                 right join yingx.yx_video v
+                            on v.category_id = y.id
+                 left join yingx.yx_user u
+                           on v.user_id = u.id
+    </sql>
+    <resultMap id="queryByRelease" type="com.zhanghui.yx.po.VideoPO">
+        <id property="id" column="v_id"/>
+        <result property="videoTitle" column="v_title"/>
+        <result property="cover" column="v_cover_path"/>
+        <result property="path" column="v_cover_path"/>
+        <result property="uploadTime" column="v_video_date"/>
+        <result property="description" column="v_brief"/>
+        <result property="categoryId" column="y_id"/>
+        <result property="cateName" column="y_category_name"/>
+        <result property="userId" column="u_id"/>
+        <result property="userName" column="u_user_name"/>
+        <result property="userPhoto" column="u_head_img"/>
+    </resultMap>
+    <!--auto generated by MybatisCodeHelper on 2020-07-08-->
+    <select id="queryAllByCategoryId" resultMap="queryByRelease">
+        select
+        <include refid="videoAndUser"/>
+        where v.category_id = #{categoryId}
+        order by v.video_date desc
+    </select>
+
+
+    <!--auto generated by MybatisCodeHelper on 2020-07-09-->
+    <select id="queryAllByIdAndCategoryIdAndUserId" resultMap="queryByRelease">
+        select
+        <include refid="videoAndUser"/>
+        <trim prefix="where" prefixOverrides="and">
+            <if test="id != null and id != ''">
+                and v.id = #{id}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                and v.category_id = #{categoryId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and u.id = #{userId}
+            </if>
+        </trim>
+    </select>
+
+    <sql id="Base_Column_List">
+            id          v_id,
+            title       v_title,
+            brief       v_brief,
+            video_date  v_video_date,
+            category_id v_category_id,
+            group_id    v_group_id,
+            user_id     v_user_id,
+            video_path  v_video_path,
+            cover_path  v_cover_path
+    </sql>
+    <!--auto generated by MybatisCodeHelper on 2020-07-14-->
+    <select id="queryByAllVideoS" resultMap="YxVideoMap">
+        select
+        <include refid="Base_Column_List"/>
+        from yingx.yx_video
+    </select>
+</mapper>

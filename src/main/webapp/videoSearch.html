@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>视频搜索</title>
+    <!--引入bootstrap中css样式-->
+    <link rel="stylesheet" href="./bootvue/css/bootstrap.min.css ">
+</head>
+
+<style>
+    em {
+        color: #c12e2a;
+    }
+</style>
+<body>
+<!--导航条-->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">视频搜索</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">欢迎用户：</a></li>
+            </ul>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div id="app">
+    <!--中心布局-->
+    <div class="container-fluid">
+        <!--搜索框-->
+        <div class="row">
+            <div class=" col-md-8 col-md-offset-1">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="searchName">名字：</label>
+                        <input type="text" class="form-control" id="searchName" placeholder="输入搜索的内容" v-model="name">
+                    </div>
+                    <!--  <div class="form-group">
+                          <label for="searchStauts"></label>
+                          <input type="email" class="form-control" id="searchStauts" placeholder="查询的状态">
+                      </div>-->
+                    <button type="button" class="btn btn-info" @click="searchByName">搜索</button>
+                </form>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px">
+            <!--用户列表展示-->
+            <div class="col-md-12">
+
+                <table class="table table-hover">
+                    <tr>
+                        <td>id</td>
+                        <td>标题</td>
+                        <td>描述</td>
+                        <td>上传时间</td>
+                        <td>视频</td>
+                        <td>截图</td>
+                        <td>操作</td>
+                    </tr>
+                    <tbody>
+                    <tr v-for="video in videos" :key="video.id">
+                        <td>{{ video.id }}</td>
+                        <td v-html="video.title"></td>
+                        <td v-html="video.brief"></td>
+                        <td>{{ video.videoDate }}</td>
+                        <td>
+                            <video controls style="height: 200px;width: 200px" v-bind:src="video.videoPath"/>
+                        </td>
+                        <td><img style="width: 200px;height: 200px" v-bind:src="video.coverPath"
+                                 alt=""></td>
+                        <td>
+                            <button class="btn btn-danger" @click="delById( video.id)">删除</button>&nbsp;&nbsp;<button
+                                class="btn bg-primary" @click="findOneAdmin(video.id)">修改
+                        </button>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!--引入vuejs-->
+<script src="./bootvue/js/vue.js"></script>
+<!--引入axios-->
+<script src="./bootvue/js/axios.min.js"></script>
+
+<script>
+    const app = new Vue({
+        el: "#app",
+        data: {
+            videos: [],
+            yxAdmin: {},//数据用来双向绑定
+            name: ""
+        },
+        methods: {
+            searchByName() {
+                let _this = this;
+                alert(this.name)
+                axios.post("http://localhost:8888/yingx/yxVideo/highlightingQuery?type=title&typevalue=" + this.name).then(function (response) {
+                    _this.videos = response.data
+                    console.log(response);
+                })
+            },
+        }
+    })
+</script>
+</body>
+</html>

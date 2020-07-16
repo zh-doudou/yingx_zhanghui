@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhanghui.yx.dao.YxFeedbackDao">
+    <resultMap type="com.zhanghui.yx.entity.YxFeedback" id="YxFeedbackMap">
+        <result property="id" column="f_id" jdbcType="VARCHAR"/>
+        <result property="title" column="f_title" jdbcType="VARCHAR"/>
+        <result property="content" column="f_content" jdbcType="VARCHAR"/>
+        <result property="userId" column="f_user_id" jdbcType="VARCHAR"/>
+        <result property="feedbackDate" column="f_feedback_date" jdbcType="TIMESTAMP"/>
+
+        <association property="yxUser" javaType="com.zhanghui.yx.entity.YxUser">
+            <id property="id" column="u_id"/>
+            <result property="userName" column="u_user_name"/>
+        </association>
+    </resultMap>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="YxFeedbackMap">
+        select f.id as f_id,
+        f.title as f_title,
+        f.content as f_content,
+        f.user_id as f_user_id,
+        f.feedback_date as f_feedback_date,
+        u.id as u_id,
+        u.user_name as u_user_name
+        from yingx.yx_feedback f
+        left join yingx.yx_user u
+        on f.user_id = u.id
+        limit #{offset}, #{limit}
+    </select>
+
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into yingx.yx_feedback(id, title, content, user_id, feedback_date)
+        values (#{id}, #{title}, #{content}, #{userId}, #{feedbackDate})
+    </insert>
+
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from yingx.yx_feedback
+        where id = #{id}
+    </delete>
+
+    <select id="selectAllCount" resultType="int">
+        select count(id)
+        from yingx.yx_feedback
+    </select>
+</mapper>

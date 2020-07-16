@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhanghui.yx.dao.YxCategoryDao">
+    <resultMap type="com.zhanghui.yx.entity.YxCategory" id="YxCategoryMap">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="categoryName" column="category_name" jdbcType="VARCHAR"/>
+        <result property="levels" column="levels" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="YxCategoryMap">
+        select id,
+               category_name,
+               levels,
+               parent_id
+        from yingx.yx_category
+        where id = #{id}
+    </select>
+
+
+    <resultMap id="selectAllCategoryS" type="YxCategory">
+        <!--实体类属性-->                  <!--表别名-->
+        <id property="id" column="c1_id"/>
+        <result property="categoryName" column="c1_category_name"/>
+        <result property="levels" column="c1_levels"/>
+        <result property="parentId" column="c1_parent_id"/>
+        <!--2级类别映射关系-->
+        <collection ofType="YxCategory" property="twoCateGoryS">
+            <id property="id" column="c2_id"/>
+            <result property="categoryName" column="c2_category_name"/>
+            <result property="levels" column="c2_levels"/>
+            <result property="parentId" column="c2_parent_id"/>
+            <!--2级类别下vodeo映射-->
+            <collection property="yxVideos" ofType="com.zhanghui.yx.entity.YxVideo">
+                <id property="id" column="v_id"/>
+                <result property="title" column="v_title"/>
+                <result property="brief" column="v_brief"/>
+                <result property="videoDate" column="v_video_date"/>
+                <result property="categoryId" column="v_category_id"/>
+                <result property="groupId" column="v_group_id"/>
+                <result property="userId" column="v_user_id"/>
+                <result property="videoPath" column="v_video_path"/>
+                <result property="coverPath" column="v_cover_path"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+
+    <!--查询指定行数据-->
+    <select id="queryAllClass" resultMap="selectAllCategoryS">
+        SELECT c1.id            as c1_id,
+               c1.category_name as c1_category_name,
+               c1.levels        as c1_levels,
+               c1.parent_id     as c1_parent_id,
+               c2.id            as c2_id,
+               c2.category_name as c2_category_name,
+               c2.levels        as c2_levels,
+               c2.parent_id     as c2_parent_id
+        FROM yingx.yx_category c1
+                     left join
+                     yingx.yx_category c2
+                             on c1.id = c2.parent_id
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAllByLevelS" resultMap="YxCategoryMap">
+        select id,
+               category_name,
+               levels,
+               parent_id
+        from yingx.yx_category
+        where levels = #{levels}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into yingx.yx_category(id, category_name, levels, parent_id)
+        values (#{id}, #{categoryName}, #{levels}, #{parentId})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update yingx.yx_category
+        <set>
+            <if test="categoryName != null and categoryName != ''">
+                category_name = #{categoryName},
+            </if>
+            <if test="levels != null and levels != ''">
+                levels = #{levels},
+            </if>
+            <if test="parentId != null and parentId != ''">
+                parent_id = #{parentId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from yingx.yx_category
+        where id = #{id}
+    </delete>
+    <!--查询所有条数-->
+    <select id="queryCountS" resultType="int">
+        select count(levels)
+        from yingx.yx_category
+    </select>
+
+    <select id="queryAllClassByPage" resultMap="selectAllCategoryS">
+        select c1.id            as c1_id,
+               c1.category_name as c1_category_name,
+               c1.levels        as c1_levels,
+               c1.parent_id     as c1_parent_id,
+               c2.id            as c2_id,
+               c2.category_name as c2_category_name,
+               c2.levels        as c2_levels,
+               c2.parent_id     as c2_parent_id,
+               v.id             as v_id,
+               v.title          as v_title,
+               v.brief          as v_brief,
+               v.video_date     as v_video_date,
+               v.category_id    as v_category_id,
+               v.user_id        as v_group_id,
+               v.user_id        as v_user_id,
+               v.video_path     as v_video_path,
+               v.cover_path     as v_cover_path
+        from yingx.yx_category c1
+                     left join yingx.yx_category c2
+                on c1.id = c2.parent_id
+                     left join yingx.yx_video v
+                on c2.id = v.category_id
+    </select>
+
+
+    <resultMap id="queryAllCategoryMap" type="com.zhanghui.yx.po.CateGoryPO">
+        <id property="id" column="c_id"/>
+        <result property="cateName" column="c_category_name"/>
+        <result property="levels" column="c_levels"/>
+        <result property="parentId" column="c_parent_id"/>
+        <collection property="categoryList" ofType="com.zhanghui.yx.po.CateGoryPO">
+            <id property="id" column="c1_id"/>
+            <result property="cateName" column="c1_category_name"/>
+            <result property="levels" column="c1_levels"/>
+            <result property="parentId" column="c1_parent_id"/>
+        </collection>
+    </resultMap>
+
+    <!--auto generated by MybatisCodeHelper on 2020-07-08-->
+    <select id="queryAllCategory" resultMap="queryAllCategoryMap">
+        select c.id             as c_id,
+               c.category_name  as c_category_name,
+               c.levels         as c_levels,
+               c.parent_id      as c_parent_id,
+               c1.id            as c1_id,
+               c1.category_name as c1_category_name,
+               c1.levels        as c1_levels,
+               c1.parent_id     as c1_parent_id
+
+        from yingx.yx_category c
+                     left join yingx.yx_category c1
+                on c.id = c1.parent_id
+                where c.levels ='1'
+    </select>
+</mapper>
